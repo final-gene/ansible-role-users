@@ -1,0 +1,7 @@
+---
+- name: Converge Installation
+  hosts: all
+  vars:
+    users: "{{ converge.users }}"
+  roles:
+    - role: finalgene.users

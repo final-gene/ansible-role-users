@@ -1,0 +1,108 @@
+---
+- name: Manage per-user group
+  when:
+    - users_create_per_user_group
+    - user.group is defined
+  ansible.builtin.group:
+    gid: "{{ user.gid | default(user.uid) | default(omit) }}"
+    local: "{{ user.local | default(omit) }}"
+    name: "{{ user.username }}"
+    state: "{{ user.state | default('present') }}"
+    system: "{{ user.system | default(omit) }}"
+
+- name: Manage user
+  ansible.builtin.user:
+    append: "{{ user.append | default(false) }}"
+    comment: "{{ user.comment | default('') }}"
+    create_home: "{{ user.home_create | default(users_create_homedirs) }}"
+    expires: "{{ user.expires | default(omit) }}"
+    force: "{{ user.force | default(false) }}"
+    generate_ssh_key: "{{ user.ssh_key_generate | default(false) }}"
+    group: "{{ user.group | default(user.username if users_create_per_user_group else users_group) }}"
+    # empty string removes user from all secondary groups
+    groups: "{{ user.groups | join(',') if user.groups is defined else '' }}"
+    home: "{{ user.home | default(users_home ~ '/' ~ user.username) }}"
+    local: "{{ user.local | default(false) }}"
+    move_home: "{{ user.move_home | default(false) }}"
+    name: "{{ user.username }}"
+    non_unique: "{{ user.non_unique | default(false) }}"
+    password: "{{ user.password | default('!') }}"
+    password_expire_max: "{{ user.password_expire_max | default(omit) }}"
+    password_expire_min: "{{ user.password_expire_min | default(omit) }}"
+    password_lock: "{{ user.password_lock | default(omit) }}"
+    remove: "{{ user.remove | default(omit) }}"
+    seuser: "{{ user.seuser | default(omit) }}"
+    shell: "{{ user.shell | default(users_default_shell) }}"
+    ssh_key_bits: "{{ user.ssh_key_bits | default(omit) }}"
+    ssh_key_comment: "{{ user.ssh_key_comment | default(omit) }}"
+    ssh_key_file: "{{ user.ssh_key_file | default(omit) }}"
+    ssh_key_passphrase: "{{ user.ssh_key_passphrase | default(omit) }}"
+    ssh_key_type: "{{ user.ssh_key_type | default(users_ssh_key_type) }}"
+    state: "{{ user.state | default('present') }}"
+    system: "{{ user.system | default(omit) }}"
+    uid: "{{ user.uid | default(omit) }}"
+    umask: "{{ user.umask | default(omit) }}"
+    update_password: "{{ user.update_password | default(omit) }}"
+
+- name: Manage user settings
+  when:
+    - user.state | default('present') == 'present'
+    - user.home_create | default(users_create_homedirs)
+    - not ansible_check_mode
+  block:
+    - name: Setting user's home permission
+      ansible.builtin.file:
+        dest: "{{ user.home | default(users_home ~ '/' ~ user.username) }}"
+        group: "{{ user.group | default(user.username if users_create_per_user_group else users_group) }}"
+        mode: "{{ user.home_mode | default(users_home_mode) }}"
+        owner: "{{ user.username }}"
+
+    - name: Adding user's .ssh directory
+      ansible.builtin.file:
+        group: "{{ user.group | default(user.username if users_create_per_user_group else users_group) }}"
+        mode: 0700
+        owner: "{{ user.username }}"
+        path: "{{ user.home | default(users_home ~ '/' ~ user.username) }}/.ssh"
+        state: directory
+
+    - name: Adding user's private keys
+      loop: "{{ user.ssh_keys | default([]) }}"
+      loop_control:
+        loop_var: ssh_key
+        label: "{{ user.username }} -> {{ ssh_key.name }}"
+      when:
+        - ssh_key.state | default('present') == 'present'
+      ansible.builtin.copy:
+        content: "{{ ssh_key.key }}"
+        dest: "{{ user.home | default(users_home ~ '/' ~ user.username) }}/.ssh/{{ ssh_key.name }}"
+        group: "{{ user.group | default(user.username if users_create_per_user_group else users_group) }}"
+        mode: 0600
+        owner: "{{ user.username }}"
+
+    - name: Removing user's private keys
+      loop: "{{ user.ssh_keys | default([]) }}"
+      loop_control:
+        loop_var: ssh_key
+        label: "{{ user.username }} -> {{ ssh_key.name }}"
+      when:
+        - ssh_key.state | default('present') != 'present'
+      ansible.builtin.file:
+        path: "{{ user.home | default(users_home ~ '/' ~ user.username) }}/.ssh/{{ ssh_key.name }}"
+        state: absent
+
+    - name: Adding user's authorized keys
+      ansible.posix.authorized_key:
+        exclusive: "{{ user.authorized_keys_exclusive | default(users_authorized_keys_exclusive) }}"
+        key: "{{ user.authorized_keys | default([]) | join('\n') }}"
+        user: "{{ user.username }}"
+
+    - name: Setup user profiles
+      when:
+        - user.profile is defined
+      ansible.builtin.blockinfile:
+        block: "{{ user.profile }}"
+        create: true
+        dest: "{{ user.home | default(users_home ~ '/' ~ user.username) }}/.profile"
+        group: "{{ user.group | default(user.username if users_create_per_user_group else users_group) }}"
+        mode: 0644
+        owner: "{{ user.username }}"

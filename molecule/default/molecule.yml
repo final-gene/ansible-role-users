@@ -1,0 +1,43 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: install
+    image: 'geerlingguy/docker-${MOLECULE_DISTRO}-ansible:latest'
+    command: /lib/systemd/systemd
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+provisioner:
+  inventory:
+    group_vars:
+      all:
+        converge:
+          users:
+            - username: test_delete
+              state: absent
+              remove: true
+              force: true
+            - username: test_created
+              state: absent
+              remove: true
+              force: true
+        prepare:
+          users:
+            - username: test_delete
+              comment: this user should be deleted
+            - username: test_keep
+              comment: this user should untouched
+
+scenario:
+  test_sequence:
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

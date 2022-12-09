@@ -1,0 +1,10 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+    - name: Create test user exists
+      loop: "{{ prepare.users }}"
+      ansible.builtin.user:
+        name: "{{ item.username }}"
+        comment: "{{ item.comment }}"
+        create_home: true

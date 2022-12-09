@@ -1,0 +1,33 @@
+---
+# Create a group for every user and make that their primary group
+users_create_per_user_group: true
+
+# If we're not creating a per-user group, then this is the group all users belong to
+users_group: users
+
+# The default shell for a user if none is specified
+users_default_shell: /bin/bash
+
+# The directory which will contain all user home directories
+users_home: /home
+
+# The default user's home directory permissions
+users_home_mode: "0750"
+
+# Create home directories for new users.
+# Set this to false if you manage home directories in some other way.
+users_create_homedirs: true
+
+# Lists of users to create and delete
+users: []
+
+# List of groups to create
+users_groups: []
+
+users_authorized_keys_file: .ssh/authorized_keys
+
+# Default user's setting for authorized keys exclusive
+users_authorized_keys_exclusive: true
+
+# Default user's ssh key type
+users_ssh_key_type: ed25519

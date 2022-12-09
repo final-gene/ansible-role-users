@@ -1,0 +1,63 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Get all local users
+      ansible.builtin.getent:
+        database: passwd
+    - name: Tests for user 'test_keep'
+      vars:
+        _username: test_keep
+      block:
+        - name: Test if user exists
+          ansible.builtin.assert:
+            that: _username in getent_passwd.keys()
+            fail_msg: "User {{ _username }} does no longer exists!"
+            success_msg: "User {{ _username }} still exists."
+        - name: Check the home directory
+          ansible.builtin.stat:
+            path: /home/{{ _username }}
+          register: _result
+        - name: Test if the home directory exists
+          ansible.builtin.assert:
+            that: _result.stat.exists
+            fail_msg: "Home directory of user {{ _username }} does no longer exists!"
+            success_msg: "Home directory of user {{ _username }} still exists."
+    - name: Tests for user 'test_created'
+      vars:
+        _username: test_created
+      block:
+        - name: Test if user was created
+          ansible.builtin.assert:
+            that: _username in getent_passwd.keys()
+            fail_msg: "User {{ _username }} was not created!"
+            success_msg: "User {{ _username }} exists."
+        - name: Check the home directory
+          ansible.builtin.stat:
+            path: /home/{{ _username }}
+          register: _result
+        - name: Test if the home directory exists
+          ansible.builtin.assert:
+            that: _result.stat.exists
+            fail_msg: "Home directory of user {{ _username }} was not created!"
+            success_msg: "Home directory of user {{ _username }} exists."
+    - name: Tests for user 'test_delete'
+      vars:
+        _username: test_delete
+      block:
+        - name: Test if user was removed
+          vars:
+            _username: test_delete
+          ansible.builtin.assert:
+            that: _username not in getent_passwd.keys()
+            fail_msg: "User {{ _username }} still exists!"
+            success_msg: "User {{ _username }} does no longer exists."
+        - name: Check the home directory
+          ansible.builtin.stat:
+            path: /home/{{ _username }}
+          register: _result
+        - name: Test if the home directory exists
+          ansible.builtin.assert:
+            that: _result.stat.exists
+            fail_msg: "Home directory of user {{ _username }} still exists!"
+            success_msg: "Home directory of user {{ _username }} does no longer exists."
