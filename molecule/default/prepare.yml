@@ -3,8 +3,10 @@
   hosts: all
   tasks:
     - name: Create test user exists
-      loop: "{{ prepare.users }}"
+      loop:
+        test_delete: this user should be deleted
+        test_keep: this user should untouched
       ansible.builtin.user:
-        name: "{{ item.username }}"
-        comment: "{{ item.comment }}"
+        name: "{{ item.key }}"
+        comment: "{{ item.value }}"
         create_home: true
