@@ -8,7 +8,6 @@
         remove: true
         force: true
       - username: test_created
-        state: absent
         remove: true
         force: true
   roles:
