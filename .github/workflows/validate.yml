@@ -35,8 +35,33 @@ jobs:
     strategy:
       matrix:
         include:
+          - distro: amazonlinux2
+          - distro: centos6
+          - distro: centos8
+          - distro: centos7
+          - distro: debian8
+          - distro: debian9
           - distro: debian10
           - distro: debian11
+          - distro: fedora24
+          - distro: fedora27
+          - distro: fedora29
+          - distro: fedora30
+          - distro: fedora31
+          - distro: fedora32
+          - distro: fedora33
+          - distro: fedora34
+          - distro: fedora35
+          - distro: fedora36
+          - distro: fedora37
+          - distro: rockylinux8
+          - distro: rockylinux9
+          - distro: ubi8
+          - distro: ubuntu1204
+          - distro: ubuntu1404
+          - distro: ubuntu1604
+          - distro: ubuntu1804
+          - distro: ubuntu2004
       fail-fast: false
 
     steps:
