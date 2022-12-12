@@ -36,7 +36,6 @@ jobs:
       matrix:
         include:
           - distro: amazonlinux2
-          - distro: centos6
           - distro: centos8
           - distro: centos7
           - distro: debian8
