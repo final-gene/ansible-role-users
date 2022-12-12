@@ -12,6 +12,8 @@
     system: "{{ user.system | default(omit) }}"
 
 - name: Manage user
+  register: _user_result
+  failed_when: _user_result.rc not in [0, 12]
   ansible.builtin.user:
     append: "{{ user.append | default(false) }}"
     comment: "{{ user.comment | default('') }}"
@@ -45,15 +47,26 @@
     umask: "{{ user.umask | default(omit) }}"
     update_password: "{{ user.update_password | default(omit) }}"
 
-- name: Remove per-user group
+- name: Handle user removal
   when:
     - user.state | default('present') == 'absent'
-    - users_create_per_user_group
-    - user.group is not defined
-  ansible.builtin.group:
-    gid: "{{ user.gid | default(user.uid) | default(omit) }}"
-    name: "{{ user.username }}"
-    state: absent
+  block:
+    - name: Force user home directory removal
+      when:
+        - _user_result.rc == 12
+        - user.remove
+      ansible.builtin.file:
+        path: "{{ user.home | default(users_home ~ '/' ~ user.username) }}"
+        state: absent
+
+    - name: Remove per-user group
+      when:
+        - users_create_per_user_group
+        - user.group is not defined
+      ansible.builtin.group:
+        gid: "{{ user.gid | default(user.uid) | default(omit) }}"
+        name: "{{ user.username }}"
+        state: absent
 
 - name: Manage user settings
   when:
