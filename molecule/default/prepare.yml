@@ -1,0 +1,14 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+    - name: Create test user exists
+      loop:
+        - username: test_delete
+          comment: this user should be deleted
+        - username: test_keep
+          comment: this user should be untouched
+      ansible.builtin.user:
+        name: "{{ item.username }}"
+        comment: "{{ item.comment }}"
+        create_home: true

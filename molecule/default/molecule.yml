@@ -1,0 +1,19 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: install
+    image: 'geerlingguy/docker-${MOLECULE_DISTRO}-ansible:latest'
+    privileged: true
+    pre_build_image: true
+scenario:
+  test_sequence:
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

@@ -1,0 +1,37 @@
+---
+galaxy_info:
+  role_name: users
+  namespace: finalgene
+  author: Frank Giesecke
+  description: user management
+  company: final gene
+  license: MIT
+  min_ansible_version: "2.13"
+  platforms:
+    - name: EL
+      versions:
+        - all
+    - name: GenericUNIX
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
+    - name: opensuse
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+    - name: SLES
+      versions:
+        - all
+    - name: GenericLinux
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - system
+    - user

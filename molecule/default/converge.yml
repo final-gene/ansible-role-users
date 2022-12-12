@@ -1,0 +1,14 @@
+---
+- name: Converge Installation
+  hosts: all
+  vars:
+    users:
+      - username: test_delete
+        state: absent
+        remove: true
+        force: true
+      - username: test_created
+        remove: true
+        force: true
+  roles:
+    - role: finalgene.users
