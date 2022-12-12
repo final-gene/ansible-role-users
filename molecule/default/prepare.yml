@@ -7,7 +7,7 @@
         - username: test_delete
           comment: this user should be deleted
         - username: test_keep
-          comment: this user should untouched
+          comment: this user should be untouched
       ansible.builtin.user:
         name: "{{ item.username }}"
         comment: "{{ item.comment }}"

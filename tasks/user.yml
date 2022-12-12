@@ -45,15 +45,26 @@
     umask: "{{ user.umask | default(omit) }}"
     update_password: "{{ user.update_password | default(omit) }}"
 
-- name: Remove per-user group
+- name: Remove user associated content
   when:
-    - users_create_per_user_group
-    - user.group is not defined
     - user.state | default('present') == 'absent'
-  ansible.builtin.group:
-    gid: "{{ user.gid | default(user.uid) | default(omit) }}"
-    name: "{{ user.username }}"
-    state: absent
+  block:
+    - name: Remove per-user group
+      when:
+        - users_create_per_user_group
+        - user.group is not defined
+      ansible.builtin.group:
+        gid: "{{ user.gid | default(user.uid) | default(omit) }}"
+        name: "{{ user.username }}"
+        state: absent
+    - name: Remove user home directory
+      when:
+        - user.remove | default(false)
+        - user.force | default(false)
+      ansible.builtin.file:
+        path: "{{ user.home | default(users_home ~ '/' ~ user.username) }}"
+        recurse: true
+        state: absent
 
 - name: Manage user settings
   when:
