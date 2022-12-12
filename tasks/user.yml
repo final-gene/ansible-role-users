@@ -1,13 +1,14 @@
 ---
-- name: Manage per-user group
+- name: Create per-user group
   when:
     - users_create_per_user_group
     - user.group is not defined
+    - user.state | default('present') == 'present'
   ansible.builtin.group:
     gid: "{{ user.gid | default(user.uid) | default(omit) }}"
     local: "{{ user.local | default(omit) }}"
     name: "{{ user.username }}"
-    state: "{{ user.state | default('present') }}"
+    state: present
     system: "{{ user.system | default(omit) }}"
 
 - name: Manage user
@@ -43,6 +44,16 @@
     uid: "{{ user.uid | default(omit) }}"
     umask: "{{ user.umask | default(omit) }}"
     update_password: "{{ user.update_password | default(omit) }}"
+
+- name: Remove per-user group
+  when:
+    - users_create_per_user_group
+    - user.group is not defined
+    - user.state | default('present') == 'absent'
+  ansible.builtin.group:
+    gid: "{{ user.gid | default(user.uid) | default(omit) }}"
+    name: "{{ user.username }}"
+    state: absent
 
 - name: Manage user settings
   when:
