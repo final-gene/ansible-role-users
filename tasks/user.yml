@@ -63,7 +63,6 @@
         - user.force | default(false)
       ansible.builtin.file:
         path: "{{ user.home | default(users_home ~ '/' ~ user.username) }}"
-        recurse: true
         state: absent
 
 - name: Manage user settings
