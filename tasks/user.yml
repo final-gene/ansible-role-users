@@ -13,7 +13,8 @@
 
 - name: Manage user
   register: _user_result
-  failed_when: _user_result.rc not in [0, 12]
+  failed_when:
+    - _user_result.rc | default(0) not in [0, 12]
   ansible.builtin.user:
     append: "{{ user.append | default(false) }}"
     comment: "{{ user.comment | default('') }}"
@@ -53,7 +54,7 @@
   block:
     - name: Force user home directory removal
       when:
-        - _user_result.rc == 12
+        - _user_result.rc | default(0) == 12
         - user.remove
       ansible.builtin.file:
         path: "{{ user.home | default(users_home ~ '/' ~ user.username) }}"
