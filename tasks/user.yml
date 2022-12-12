@@ -2,7 +2,7 @@
 - name: Manage per-user group
   when:
     - users_create_per_user_group
-    - user.group is defined
+    - user.group is not defined
   ansible.builtin.group:
     gid: "{{ user.gid | default(user.uid) | default(omit) }}"
     local: "{{ user.local | default(omit) }}"
