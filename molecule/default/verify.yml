@@ -58,6 +58,6 @@
           register: _result
         - name: Test if the home directory exists
           ansible.builtin.assert:
-            that: _result.stat.exists
+            that: not _result.stat.exists
             fail_msg: "Home directory of user {{ _username }} still exists!"
             success_msg: "Home directory of user {{ _username }} does no longer exists."
