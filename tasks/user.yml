@@ -23,8 +23,7 @@
 
 - name: Manage user
   register: _user_result
-  failed_when:
-    - _user_result.rc | default(0) not in [0, 12]
+  ignore_errors: true
   ansible.builtin.user:
     append: "{{ user.append | default(false) }}"
     comment: "{{ user.comment | default('') }}"
@@ -57,6 +56,14 @@
     uid: "{{ user.uid | default(omit) }}"
     umask: "{{ user.umask | default(omit) }}"
     update_password: "{{ user.update_password | default(omit) }}"
+
+- name: Fail on user management error
+  when: >-
+    (_user_result.rc is defined and _user_result.rc | default(0) not in [0, 12])
+    or
+    (_user_result.rc is not defined and _user_result is failed)
+  ansible.builtin.fail:
+    msg: "{{ _user_result.msg | default('An error occured during user management!') }}"
 
 - name: Handle user removal
   when:
