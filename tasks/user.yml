@@ -1,8 +1,18 @@
 ---
+- name: Show processed user
+  ansible.builtin.debug:
+    msg: Process user {{ user.username }} => {{ user.state | default('present') }}
+    verbosity: 0
+
+- name: Show processed user
+  ansible.builtin.debug:
+    var: user
+    verbosity: 3
+
 - name: Create per-user group
   when:
     - users_create_per_user_group
-    - user.group is not defined
+    - user.group is not defined or user.group == user.username
     - user.state | default('present') == 'present'
   ansible.builtin.group:
     gid: "{{ user.gid | default(user.uid) | default(omit) }}"
@@ -13,8 +23,7 @@
 
 - name: Manage user
   register: _user_result
-  failed_when:
-    - _user_result.rc | default(0) not in [0, 12]
+  ignore_errors: true
   ansible.builtin.user:
     append: "{{ user.append | default(false) }}"
     comment: "{{ user.comment | default('') }}"
@@ -47,6 +56,14 @@
     uid: "{{ user.uid | default(omit) }}"
     umask: "{{ user.umask | default(omit) }}"
     update_password: "{{ user.update_password | default(omit) }}"
+
+- name: Fail on user management error
+  when: >-
+    (_user_result.rc is defined and _user_result.rc | default(0) not in [0, 12])
+    or
+    (_user_result.rc is not defined and _user_result is failed)
+  ansible.builtin.fail:
+    msg: "{{ _user_result.msg | default('An error occured during user management!') }}"
 
 - name: Handle user removal
   when:
