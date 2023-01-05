@@ -12,7 +12,7 @@
 - name: Create per-user group
   when:
     - users_create_per_user_group
-    - user.group is not defined
+    - user.group is not defined or user.group == user.username
     - user.state | default('present') == 'present'
   ansible.builtin.group:
     gid: "{{ user.gid | default(user.uid) | default(omit) }}"
