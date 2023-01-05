@@ -1,13 +1,16 @@
 ---
 - name: Manage groups
   loop: "{{ users_groups }}"
+  loop_control:
+    loop_var: group
+    label: "{{ group.name }}"
   ansible.builtin.group:
-    gid: "{{ item.gid | default(omit) }}"
-    local: "{{ item.local | default(omit) }}"
-    name: "{{ item.name }}"
-    non_unique: "{{ item.non_unique | default(omit) }}"
-    state: "{{ item.state | default('present') }}"
-    system: "{{ item.system | default(omit) }}"
+    gid: "{{ group.gid | default(omit) }}"
+    local: "{{ group.local | default(omit) }}"
+    name: "{{ group.name }}"
+    non_unique: "{{ group.non_unique | default(omit) }}"
+    state: "{{ group.state | default('present') }}"
+    system: "{{ group.system | default(omit) }}"
 
 - name: Manage user
   loop: "{{ users }}"

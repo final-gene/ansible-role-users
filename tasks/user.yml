@@ -1,4 +1,14 @@
 ---
+- name: Show processed user
+  ansible.builtin.debug:
+    msg: Process user {{ user.username }} => {{ user.state | default('present') }}
+    verbosity: 0
+
+- name: Show processed user
+  ansible.builtin.debug:
+    var: user
+    verbosity: 3
+
 - name: Create per-user group
   when:
     - users_create_per_user_group
