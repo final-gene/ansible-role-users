@@ -57,9 +57,14 @@
     umask: "{{ user.umask | default(omit) }}"
     update_password: "{{ user.update_password | default(omit) }}"
 
+# Handle uncritical errors during user management
+# Return codes:
+#   0:  success
+#   8:  user can't be modified while in use
+#   12: can't remove home directory when removing the user, usually occurs when no mail spooler is available
 - name: Fail on user management error
   when: >-
-    (_user_result.rc is defined and _user_result.rc | default(0) not in [0, 12])
+    (_user_result.rc is defined and _user_result.rc | default(0) not in [0, 8, 12])
     or
     (_user_result.rc is not defined and _user_result is failed)
   ansible.builtin.fail:
