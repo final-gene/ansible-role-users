@@ -34,3 +34,15 @@ users_authorized_keys_exclusive: true
 
 # Default user's ssh key type
 users_ssh_key_type: ed25519
+
+# Kill running user processes if user is in use
+users_kill_process: false
+
+# List of users which process should be killed (no limitation if not defined)
+# users_kill_process_allowed_users: []
+
+# List of users which process should never be killed (root is always forbidden)
+users_kill_process_forbidden_users: []
+
+# Time to wait before force kill a process
+users_kill_process_timeout: 30
