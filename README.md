@@ -24,6 +24,7 @@ ansible-galaxy collection install ansible.posix
 | users_group                     | string          | `users`                | The default group name all users belong to.<br>Only required if `users_create_per_user_group` is set to `false`. |
 | users_groups                    | list of objects | `[]`                   | List of user groups to create/delete (see [users_groups](#users_groups)).                                        |
 | users_home                      | string          | `/home`                | The directory which will contain all user home directories.                                                      |
+| users_home_chroot               | boolean         | `false`                | The default user's home directory chroot setting.                                                                |
 | users_home_mode                 | string          | `0750`                 | The default user's home directory permissions.                                                                   |
 | users_ssh_key_type              | string          | `rsa`                  | Default user's ssh key type.                                                                                     |
 
@@ -40,6 +41,7 @@ ansible-galaxy collection install ansible.posix
 | group                     | string               |           | The of the user's primary group.                                                                                                                                     |
 | groups                    | list of strings      |           | A list of all groups the user belongs to.                                                                                                                            |
 | home                      | string               |           | Absolute path to the user's home directory.                                                                                                                          |
+| home_chroot               | boolean              |           | Set home ownership to `root` to allow chroot feature for user home directories.                                                                                      |
 | home_create               | boolean              |           | Create the user's home directory.                                                                                                                                    |
 | home_mode                 | string               |           | The user's home directory permissions.                                                                                                                               |
 | local                     | boolean              | `false`   | Forces the use of “local” command alternatives on platforms that implement it.                                                                                       |

@@ -11,6 +11,9 @@ users_default_shell: /bin/bash
 # The directory which will contain all user home directories
 users_home: /home
 
+# The default user's home directory chroot setting
+users_home_chroot: false
+
 # The default user's home directory permissions
 users_home_mode: "0750"
 
