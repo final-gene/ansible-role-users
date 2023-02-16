@@ -102,7 +102,7 @@
         dest: "{{ user.home | default(users_home ~ '/' ~ user.username) }}"
         group: "{{ user.group | default(user.username if users_create_per_user_group else users_group) }}"
         mode: "{{ user.home_mode | default(users_home_mode) }}"
-        owner: "{{ user.username }}"
+        owner: "{{ 'root' if user.home_chroot | default(users_home_chroot) else user.username }}"
 
     - name: Adding user's .ssh directory
       ansible.builtin.file:
