@@ -13,20 +13,24 @@ ansible-galaxy collection install ansible.posix
 
 ## Role Variables
 
-| Variable                        | Type            | Default                | Comments                                                                                                         |
-|---------------------------------|-----------------|------------------------|------------------------------------------------------------------------------------------------------------------|
-| users                           | list of objects | `[]`                   | List of users to create/delete (see [users](#users)).                                                            |
-| users_authorized_keys_exclusive | boolean         | `true`                 | Default user's setting for authorized keys exclusive.                                                            |
-| users_authorized_keys_file      | string          | `.ssh/authorized_keys` | Path to the `authorized_keys` file inside the user's home directory.                                             |
-| users_create_homedirs           | boolean         | `true`                 | Create home directories for new users.                                                                           |
-| users_create_per_user_group     | boolean         | `true`                 | Create a group for every user and make that their primary group if set to `true`.                                |
-| users_default_shell             | string          | `/bin/bash`            | The default shell for a user if none is specified.                                                               |
-| users_group                     | string          | `users`                | The default group name all users belong to.<br>Only required if `users_create_per_user_group` is set to `false`. |
-| users_groups                    | list of objects | `[]`                   | List of user groups to create/delete (see [users_groups](#users_groups)).                                        |
-| users_home                      | string          | `/home`                | The directory which will contain all user home directories.                                                      |
-| users_home_chroot               | boolean         | `false`                | The default user's home directory chroot setting.                                                                |
-| users_home_mode                 | string          | `0750`                 | The default user's home directory permissions.                                                                   |
-| users_ssh_key_type              | string          | `rsa`                  | Default user's ssh key type.                                                                                     |
+| Variable                           | Type            | Default                | Comments                                                                                                                                            |
+|------------------------------------|-----------------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| users                              | list of objects | `[]`                   | List of users to create/delete (see [users](#users)).                                                                                               |
+| users_authorized_keys_exclusive    | boolean         | `true`                 | Default user's setting for authorized keys exclusive.                                                                                               |
+| users_authorized_keys_file         | string          | `.ssh/authorized_keys` | Path to the `authorized_keys` file inside the user's home directory.                                                                                |
+| users_create_homedirs              | boolean         | `true`                 | Create home directories for new users.                                                                                                              |
+| users_create_per_user_group        | boolean         | `true`                 | Create a group for every user and make that their primary group if set to `true`.                                                                   |
+| users_default_shell                | string          | `/bin/bash`            | The default shell for a user if none is specified.                                                                                                  |
+| users_group                        | string          | `users`                | The default group name all users belong to.<br>Only required if `users_create_per_user_group` is set to `false`.                                    |
+| users_groups                       | list of objects | `[]`                   | List of user groups to create/delete (see [users_groups](#users_groups)).                                                                           |
+| users_home                         | string          | `/home`                | The directory which will contain all user home directories.                                                                                         |
+| users_home_chroot                  | boolean         | `false`                | The default user's home directory chroot setting.                                                                                                   |
+| users_home_mode                    | string          | `0750`                 | The default user's home directory permissions.                                                                                                      |
+| users_kill_process                 | boolean         | `false`                | Kill user process if user is in use.                                                                                                                |
+| users_kill_process_allowed_users   | list of strings |                        | List of user names which processes should be killed.<br>Only used if `users_kill_processes` is set to `true`.                                       |
+| users_kill_process_forbidden_users | list of strings | `[]`                   | List of user names which processes should never be killed.<br>`root` is always prohibited!<br>Only used if `users_kill_processes` is set to `true`. |
+| users_kill_process_timeout         | integer         | `30`                   | Time to wait before force kill a process.<br>Only used if `users_kill_processes` is set to `true`.                                                  |
+| users_ssh_key_type                 | string          | `rsa`                  | Default user's ssh key type.                                                                                                                        |
 
 ### users
 

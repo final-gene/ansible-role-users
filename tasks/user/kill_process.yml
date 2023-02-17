@@ -1,0 +1,27 @@
+---
+- name: Stop process
+  register: __kill
+  changed_when: __kill.rc == 0
+  failed_when: false
+  ansible.builtin.command:
+    cmd: kill {{ _pid }}
+
+- name: Wait for process to stop
+  register: _killed_process
+  changed_when: false
+  check_mode: false
+  ignore_errors: true
+  until: _killed_process is succeeded
+  retries: "{{ users_kill_process_timeout }}"
+  delay: 1
+  ansible.builtin.wait_for:
+    path: /proc/{{ _pid }}/status
+    state: absent
+
+- name: Force kill stuck process
+  when: _killed_process is failed
+  register: __kill
+  changed_when: __kill.rc == 0
+  failed_when: false
+  ansible.builtin.command:
+    cmd: kill -9 {{ _pid }}

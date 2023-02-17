@@ -1,0 +1,82 @@
+---
+- name: Manage user
+  register: _user_result
+  ignore_errors: true
+  ansible.builtin.user:
+    append: "{{ user.append | default(false) }}"
+    comment: "{{ user.comment | default('') }}"
+    create_home: "{{ user.home_create | default(users_create_homedirs) }}"
+    expires: "{{ user.expires | default(omit) }}"
+    force: "{{ user.force | default(false) }}"
+    generate_ssh_key: "{{ user.ssh_key_generate | default(false) }}"
+    group: "{{ user.group | default(user.username if users_create_per_user_group else users_group) }}"
+    # empty string removes user from all secondary groups
+    groups: "{{ user.groups | join(',') if user.groups is defined else '' }}"
+    home: "{{ user.home | default(users_home ~ '/' ~ user.username) }}"
+    local: "{{ user.local | default(false) }}"
+    move_home: "{{ user.move_home | default(false) }}"
+    name: "{{ user.username }}"
+    non_unique: "{{ user.non_unique | default(false) }}"
+    password: "{{ user.password | default('!') }}"
+    password_expire_max: "{{ user.password_expire_max | default(omit) }}"
+    password_expire_min: "{{ user.password_expire_min | default(omit) }}"
+    password_lock: "{{ user.password_lock | default(omit) }}"
+    remove: "{{ user.remove | default(omit) }}"
+    seuser: "{{ user.seuser | default(omit) }}"
+    shell: "{{ user.shell | default(users_default_shell) }}"
+    ssh_key_bits: "{{ user.ssh_key_bits | default(omit) }}"
+    ssh_key_comment: "{{ user.ssh_key_comment | default(omit) }}"
+    ssh_key_file: "{{ user.ssh_key_file | default(omit) }}"
+    ssh_key_passphrase: "{{ user.ssh_key_passphrase | default(omit) }}"
+    ssh_key_type: "{{ user.ssh_key_type | default(users_ssh_key_type) }}"
+    state: "{{ user.state | default('present') }}"
+    system: "{{ user.system | default(omit) }}"
+    uid: "{{ user.uid | default(omit) }}"
+    umask: "{{ user.umask | default(omit) }}"
+    update_password: "{{ user.update_password | default(omit) }}"
+
+# Handle uncritical errors during user management
+# Return codes:
+#   0:  success
+#   8:  user can't be modified while in use
+#   12: can't remove home directory when removing the user, usually occurs when no mail spooler is available
+- name: Fail on user management error
+  when: >-
+    (_user_result.rc is defined and _user_result.rc not in [0, 8, 12])
+    or
+    (_user_result.rc is defined and _user_result.rc == 8 and _manage_user_retry | int >= 9)
+    or
+    (_user_result.rc is not defined and _user_result is failed)
+  ansible.builtin.fail:
+    msg: "{{ _user_result.msg | default('An error occured during user management!') }}"
+
+- name: Handle "user in use" error
+  when:
+    - users_kill_process
+    - _user_result.rc is defined and _user_result.rc == 8
+    - user.username not in ['root'] + users_kill_process_forbidden_users
+    - user.username in users_kill_process_allowed_users | default([user.username])
+  block:
+    - name: Get running processes
+      register: _process_list
+      changed_when: false
+      check_mode: false
+      ansible.builtin.command:
+        cmd: ps -u {{ user.username }} -U {{ user.username }} -o pid=
+
+    - name: Stop running processes
+      loop: "{{ _process_list.stdout_lines }}"
+      loop_control:
+        loop_var: _pid
+        label: "Kill PID {{ _pid }}"
+      ansible.builtin.include_tasks: kill_process.yml
+
+    # Do this as a separate task to avoid "recursive loop detected in template string" error
+    - name: Increment retry counter
+      ansible.builtin.set_fact:
+        __manage_user_retry: "{{ _manage_user_retry | int + 1 }}"
+
+    - name: Retry to manage user
+      vars:
+        _manage_user_retry: "{{ __manage_user_retry }}"
+      ansible.builtin.include_tasks: manage.yml
