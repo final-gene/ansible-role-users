@@ -35,12 +35,22 @@
         - name: Check the home directory
           ansible.builtin.stat:
             path: /home/{{ _username }}
-          register: _result
+          register: _home_test_result
         - name: Test if the home directory exists
           ansible.builtin.assert:
-            that: _result.stat.isdir
+            that: _home_test_result.stat.isdir
             fail_msg: "Home directory of user {{ _username }} was not created!"
             success_msg: "Home directory of user {{ _username }} exists."
+        - name: Test home directory owner
+          ansible.builtin.assert:
+            that: _home_test_result.stat.pw_name == _username
+            fail_msg: "Owner {{ _home_test_result.stat.pw_name }} of home directory of user {{ _username }} was not set as expected!"
+            success_msg: "Owner of home directory of user {{ _username }} is set properly."
+        - name: Test home directory group
+          ansible.builtin.assert:
+            that: _home_test_result.stat.gr_name == _username
+            fail_msg: "Group {{ _home_test_result.stat.gr_name }} of home directory of user {{ _username }} was not set as expected!"
+            success_msg: "Group of home directory of user {{ _username }} is set properly."
     - name: Tests for user 'test_created_with_managed_files'
       vars:
         _username: test_created_with_managed_files
@@ -59,6 +69,16 @@
             that: _home_test_result.stat.isdir
             fail_msg: "Home directory of user {{ _username }} was not created!"
             success_msg: "Home directory of user {{ _username }} exists."
+        - name: Test home directory owner
+          ansible.builtin.assert:
+            that: _home_test_result.stat.pw_name == _username
+            fail_msg: "Owner {{ _result.stat.pw_name }} of home directory of user {{ _username }} was not set as expected!"
+            success_msg: "Owner of home directory of user {{ _username }} is set properly."
+        - name: Test home directory group
+          ansible.builtin.assert:
+            that: _home_test_result.stat.gr_name == _username
+            fail_msg: "Group {{ _result.stat.gr_name }} of home directory of user {{ _username }} was not set as expected!"
+            success_msg: "Group of home directory of user {{ _username }} is set properly."
         - name: Check generated home_files directory 'foo'
           ansible.builtin.stat:
             path: /home/{{ _username }}/foo
@@ -73,6 +93,16 @@
             that: _foo_dir_test_result.stat.mode == '0750'
             fail_msg: "Permissions ({{ _foo_dir_test_result.stat.mode }}) of the directory within home of user {{ _username }} are not set as expectet!"
             success_msg: "Permissions of the directory within home of user {{ _username }} are set properly."
+        - name: Test home_files directory `foo` owner
+          ansible.builtin.assert:
+            that: _foo_dir_test_result.stat.pw_name == _username
+            fail_msg: "Owner {{ _foo_dir_test_result.stat.pw_name }} of the directory within home of user {{ _username }} was not set as expected!"
+            success_msg: "Owner of the directory within home of user {{ _username }} is set properly."
+        - name: Test home_files directory `foo` group
+          ansible.builtin.assert:
+            that: _foo_dir_test_result.stat.gr_name == _username
+            fail_msg: "Group {{ _foo_dir_test_result.stat.gr_name }} of the directory within home of user {{ _username }} was not set as expected!"
+            success_msg: "Group of the directory within home of user {{ _username }} is set properly."
         - name: Check generated home_files file 'foo/bar'
           ansible.builtin.stat:
             path: /home/{{ _username }}/foo/bar
@@ -88,6 +118,16 @@
             that: _bar_file_test_result.stat.mode == '0640'
             fail_msg: "Permissions ({{ _bar_file_test_result.stat.mode }}) of the file within home of user {{ _username }} are not set as expectet!"
             success_msg: "Permissions of the file within home of user {{ _username }} are set properly."
+        - name: Test home_files directory `foo` owner
+          ansible.builtin.assert:
+            that: _bar_file_test_result.stat.pw_name == _username
+            fail_msg: "Owner {{ _bar_file_test_result.stat.pw_name }} of the file within home of user {{ _username }} was not set as expected!"
+            success_msg: "Owner of the file within home of user {{ _username }} is set properly."
+        - name: Test home_files directory `foo` group
+          ansible.builtin.assert:
+            that: _bar_file_test_result.stat.gr_name == _username
+            fail_msg: "Group {{ _bar_file_test_result.stat.gr_name }} of the file within home of user {{ _username }} was not set as expected!"
+            success_msg: "Group of the file within home of user {{ _username }} is set properly."
         - name: Test home_files file 'foo/bar' content
           ansible.builtin.assert:
             that: _bar_file_test_result.stat.checksum == 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3'
