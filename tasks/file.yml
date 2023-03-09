@@ -6,7 +6,6 @@
   ansible.builtin.file:
     mode: "{{ _home_file.dir_mode | default('0750') }}"
     path: "{{ user.home | default(users_home ~ '/' ~ user.username) }}/{{ _home_file.path | dirname }}"
-    recurse: true
     state: directory
 
 - name: Create or update file
