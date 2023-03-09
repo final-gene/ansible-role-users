@@ -1,0 +1,33 @@
+---
+- name: Ensure all directories exits
+  when:
+    - _home_file.state | default('present') == 'present'
+    - _home_file.path | dirname | length > 0
+  ansible.builtin.file:
+    mode: "{{ _home_file.dir_mode | default('0750') }}"
+    path: "{{ user.home | default(users_home ~ '/' ~ user.username) }}/{{ _home_file.path | dirname }}"
+    recurse: true
+    state: directory
+
+- name: Create or update file
+  when: _home_file.state | default('present') == 'present'
+  block:
+    - name: Create or update file from template
+      when: _home_file.template is defined
+      ansible.builtin.template:
+        dest: "{{ user.home | default(users_home ~ '/' ~ user.username) }}/{{ _home_file.path }}"
+        mode: "{{ _home_file.file_mode | default('0640') }}"
+        src: "{{ _home_file.template }}"
+
+    - name: Create or update file from content
+      when: _home_file.template is not defined
+      ansible.builtin.copy:
+        content: "{{ _home_file.content }}"
+        dest: "{{ user.home | default(users_home ~ '/' ~ user.username) }}/{{ _home_file.path }}"
+        mode: "{{ _home_file.file_mode | default('0640') }}"
+
+- name: Remove file
+  when: _home_file.state | default('present') == 'absent'
+  ansible.builtin.file:
+    path: "{{ user.home | default(users_home ~ '/' ~ user.username) }}/{{ _home_file.path }}"
+    state: absent

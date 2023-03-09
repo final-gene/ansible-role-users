@@ -38,9 +38,43 @@
           register: _result
         - name: Test if the home directory exists
           ansible.builtin.assert:
-            that: _result.stat.exists
+            that: _result.stat.isdir
             fail_msg: "Home directory of user {{ _username }} was not created!"
             success_msg: "Home directory of user {{ _username }} exists."
+        - name: Check generated home_files directory
+          ansible.builtin.stat:
+            path: /home/{{ _username }}/foo
+          register: _result
+        - name: Test if the home_files directory exists
+          ansible.builtin.assert:
+            that: _result.stat.isdir
+            fail_msg: "Directory within home of user {{ _username }} was not created!"
+            success_msg: "Directory within home of user {{ _username }} exists."
+        - name: Test home_files directory permissions
+          ansible.builtin.assert:
+            that: _result.stat.mode == '0750'
+            fail_msg: "Permissions of the directory within home of user {{ _username }} are not set as expectet!"
+            success_msg: "Permissions of the directory within home of user {{ _username }} are set properly."
+        - name: Check generated home_files file
+          ansible.builtin.stat:
+            path: /home/{{ _username }}/foo/bar
+            checksum_algorithm: sha1
+          register: _result
+        - name: Test if the home_files file exists
+          ansible.builtin.assert:
+            that: _result.stat.isreg
+            fail_msg: "File within home of user {{ _username }} was not created!"
+            success_msg: "File within home of user {{ _username }} exists."
+        - name: Test home_files file permissions
+          ansible.builtin.assert:
+            that: _result.stat.mode == '0640'
+            fail_msg: "Permissions of the file within home of user {{ _username }} are not set as expectet!"
+            success_msg: "Permissions of the file within home of user {{ _username }} are set properly."
+        - name: Test home_files file content
+          ansible.builtin.assert:
+            that: _result.stat.checksum == 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3'
+            fail_msg: "Content of the file within home of user {{ _username }} is not set as expectet!"
+            success_msg: "Content of the file within home of user {{ _username }} is set properly."
     - name: Tests for user 'test_delete'
       vars:
         _username: test_delete
