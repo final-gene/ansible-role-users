@@ -111,7 +111,7 @@
         owner: "{{ user.username }}"
 
     - name: Manage home files
-      loop: "{{ user.home_files }}"
+      loop: "{{ user.home_files | default([]) }}"
       loop_control:
         loop_var: _home_file
         label: "{{ user.username }} -> {{ _home_file.path }}"

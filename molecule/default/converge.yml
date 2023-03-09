@@ -10,8 +10,15 @@
       - username: test_created
         remove: true
         force: true
+      - username: test_created_with_managed_files
+        remove: true
+        force: true
         home_files:
           - path: foo/bar
             content: test
+          - path: foo/delete
+            content: should be deleted
+          - path: foo/delete
+            state: absent
   roles:
     - role: finalgene.users
