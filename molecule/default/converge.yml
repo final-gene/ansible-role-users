@@ -10,5 +10,8 @@
       - username: test_created
         remove: true
         force: true
+        home_files:
+          - path: foo/bar
+            content: test
   roles:
     - role: finalgene.users

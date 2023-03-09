@@ -109,3 +109,10 @@
         group: "{{ user.group | default(user.username if users_create_per_user_group else users_group) }}"
         mode: 0644
         owner: "{{ user.username }}"
+
+    - name: Manage home files
+      loop: "{{ user.home_files }}"
+      loop_control:
+        loop_var: _home_file
+        label: "{{ user.username }} -> {{ _home_file.path }}"
+      ansible.builtin.include_tasks: file.yml

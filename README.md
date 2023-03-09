@@ -47,6 +47,7 @@ ansible-galaxy collection install ansible.posix
 | home                      | string               |           | Absolute path to the user's home directory.                                                                                                                          |
 | home_chroot               | boolean              |           | Set home ownership to `root` to allow chroot feature for user home directories.                                                                                      |
 | home_create               | boolean              |           | Create the user's home directory.                                                                                                                                    |
+| home_files                | list of objects      |           | List of files which should be managed within the users home directory.                                                                                               |
 | home_mode                 | string               |           | The user's home directory permissions.                                                                                                                               |
 | local                     | boolean              | `false`   | Forces the use of “local” command alternatives on platforms that implement it.                                                                                       |
 | move_home                 | boolean              | `false`   | If set to `true` when used with `home:`, attempt to move the user’s old home directory to the specified directory if it isn’t there already and the old home exists. |
@@ -65,11 +66,22 @@ ansible-galaxy collection install ansible.posix
 | ssh_key_password          | string               |           | Passphrase for the generated ssh key.                                                                                                                                |
 | ssh_key_type              | string               |           | Type of the generated ssh key (`rsa`, `ed25519`, etc.).                                                                                                              |
 | ssh_keys                  | list of objects      |           | List of private ssh keys to provide for the user (see [ssh_keys](#ssh_keys)).                                                                                        |
-| state                     | boolean              | `present` | `present` will create or update the user.<br>`absent` will remove an existing user.                                                                                  |
+| state                     | string               | `present` | `present` will create or update the user.<br>`absent` will remove an existing user.                                                                                  |
 | system                    | boolean              |           | Weather the user is a system user (`true`) or not (`false`).                                                                                                         |
 | uid                       | integer              |           | The user's UID. If not defined, the create process will use the nex available UID.                                                                                   |
 | update_password           | boolean              |           | `always` will update passwords if they differ.<br>`on_create` will only set the password for newly created users.                                                    |
 | username                  | string<br>_required_ |           | Login name of the user.                                                                                                                                              |
+
+### home_files
+
+| Variable  | Type    | Default   | Comments                                                                            |
+|-----------|---------|-----------|-------------------------------------------------------------------------------------|
+| content   | string  |           | Content of the managed file (only used when `template` is not defined).             |
+| dir_mode  | string  | `0750`    | Directory permissions (only used if directories have to be created).                |
+| file_mode | string  | `0640`    | File permissions.                                                                   |
+| path      | string  |           | File path, relative to the users home directory.                                    |
+| state     | string  | `present` | `present` will create or update the file.<br>`absent` will remove an existing file. |
+| template  | string  |           | Weather the group is a system group (`true`) or not (`false`).                      |
 
 ### ssh_keys
 
@@ -77,7 +89,7 @@ ansible-galaxy collection install ansible.posix
 |----------|----------------------|-----------|---------------------------------------------------------------------------------------------------------------|
 | name     | string<br>_required_ |           | Name of the key file.                                                                                         |
 | key      | string               |           | SSH private key file content.                                                                                 |
-| state    | boolean              | `present` | `present` will store the key file in the user's home directory.<br>`absent` will remove an existing key file. |
+| state    | string               | `present` | `present` will store the key file in the user's home directory.<br>`absent` will remove an existing key file. |
 
 ### users_groups
 
@@ -86,7 +98,7 @@ ansible-galaxy collection install ansible.posix
 | gid      | integer              |           | The groups GID. If not defined, the create process will use the nex available GID.    |
 | local    | boolean              | `false`   | Forces the use of “local” command alternatives on platforms that implement it.        |
 | name     | string<br>_required_ |           | Name of the group.                                                                    |
-| state    | boolean              | `present` | `present` will create or update the group.<br>`absent` will remove an existing group. |
+| state    | string               | `present` | `present` will create or update the group.<br>`absent` will remove an existing group. |
 | system   | boolean              |           | Weather the group is a system group (`true`) or not (`false`).                        |
 
 ## Example Playbook
