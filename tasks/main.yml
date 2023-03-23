@@ -4,12 +4,13 @@
   loop_control:
     loop_var: group
     label: "{{ group.name }}"
+  when: group.state | default('present') == 'present'
   ansible.builtin.group:
     gid: "{{ group.gid | default(omit) }}"
     local: "{{ group.local | default(omit) }}"
     name: "{{ group.name }}"
     non_unique: "{{ group.non_unique | default(omit) }}"
-    state: "{{ group.state | default('present') }}"
+    state: present
     system: "{{ group.system | default(omit) }}"
 
 - name: Manage user
@@ -18,3 +19,13 @@
     loop_var: user
     label: "{{ user.username }}"
   ansible.builtin.include_tasks: user.yml
+
+- name: Remove groups
+  loop: "{{ users_groups }}"
+  loop_control:
+    loop_var: group
+    label: "{{ group.name }}"
+  when: group.state | default('present') == 'absent'
+  ansible.builtin.group:
+    name: "{{ group.name }}"
+    state: absent
