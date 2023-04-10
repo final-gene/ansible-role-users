@@ -22,7 +22,7 @@ jobs:
           command: ansible-galaxy collection install community.general
 
       - name: Run ansible-lint
-        uses: ansible-community/ansible-lint-action@v6.11.0
+        uses: ansible-community/ansible-lint-action@v6.14.4
 
   molecule:
     name: Run Molecule Tests
